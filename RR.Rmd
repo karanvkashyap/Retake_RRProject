@@ -1,15 +1,42 @@
 ---
-title: "RR"
-author: "Sandile Nhlalo-Sibanda"
-date: "2022-09-07"
+title: "Alcohol Consumption and Average Grades"
+author: "Karan Vijay Kashyap, Sandile Nhlalo-Sibanda"
+date: "August, 2022"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+\centering
 
-```{r, echo=FALSE}
+\raggedright
+
+\abstract
+This project investigates if alcohol intake has any predictive value over average student grades. We're also curious about replicating the original study and seeing whether other factors may be major predictors of student grades. We will not attempt to forecast student grade progression across marking periods because all of the characteristics in the dataset (except grades) remain constant throughout marking periods and are basic descriptors of student backgrounds.
+
+\newpage 
+# Introduction
+The project is set up as follows.
+We first do Exploratory Data Analysis to determine whether the two tables (with math and Portuguese grades) can be integrated.
+
+We derive student average grades throughout grading periods by integrating the two tables and estimate three models: Linear Model, Regression Tree Model, and Random Forest Model.
+
+Later, we acquired data from a survey for English and Math grades, and we will replicate the research on a fresh dataset, estimating three models: Linear Model, Regression Tree Model, and Random Forest Model.
+
+# About Data
+While this is an excellent dataset, it lacks information on parents' income. These findings are based on surveys of students done at two Portuguese schools. As a result, I assume there shouldn't be much variety in parents' wealth (definitely not as much as in the California education system), class sizes, and computers/students. As a result, one downside (or advantage, depending on your point of view) of this dataset is that it maintains some of the crucial variables relatively constant.
+Schoolsup is a characteristic in the dataset that may be associated to parental income (extra educational support, yes or no). After higher and Medu, schoolsup is the third most important predictor of student average grades. What's more, schoolsup is inversely associated to average grades.
+
+
+## Objective of study
+The goal of this study is to determine the effect of alcohol use on students' average grades.
+
+\newpage
+
+# Load the packages
+
+```{r, include=FALSE}
 library(ggplot2)
 library(plyr)
 library(dplyr)
@@ -21,9 +48,12 @@ library(rpart)
 library(waffle)
 library(party)
 library(randomForest)
-library(DMwR2)
+```
 
 
+# Data Analysis
+
+```{r, echo=FALSE}
 d1 <- read.table("student-mat.csv",sep=",",header=TRUE) #Reading Math dataset
 d2 <- read.table("student-por.csv",sep=",",header=TRUE) #Reading Portuguese dataset
 
@@ -33,13 +63,21 @@ data_maths <- read.table("Student_Maths.csv",sep=",",header=TRUE) #Reading Maths
 
 colnames(data_maths)[1] <- "school"
 colnames(data_english)[1] <- "school"
+```
 
+
+```{r, echo=FALSE}
 #merging datasets by common columns into single DS
 data.source=merge(d1,d2,by=c("school","sex","age","address", "famsize", "Pstatus", "Medu", "Fedu", "Mjob", "Fjob", "reason", "nursery", "internet", "guardian","guardian","traveltime","studytime","failures", "schoolsup","famsup","activities","higher","romantic", "famrel", "freetime", "goout", "Dalc", "Walc", "health", "absences"))
 
+head(data.source)
+```
+
+```{r, echo=FALSE}
 #merging NEW datasets by common columns into single DS
 new_data.source=merge(data_english,data_maths,by=c("school","sex","age","address","famsize","Pstatus", "Medu", "Fedu", "Mjob", "Fjob", "reason", "nursery", "internet", "guardian", "guardian", "traveltime", "studytime", "failures", "schoolsup", "famsup", "activities", "higher", "romantic", "famrel", "freetime", "goout", "Dalc", "Walc", "health", "absences"))
 
+head(new_data.source)
 ```
 
 ## Including Plots
