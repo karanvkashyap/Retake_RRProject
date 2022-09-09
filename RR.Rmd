@@ -94,6 +94,7 @@ data.source=merge(d1,d2,by=c("school","sex","age","address", "famsize", "Pstatus
 ```{r echo=FALSE, results= 'asis'}
 kable(data.source[1:5,], caption = "Original Data set")
 ```
+
 ## New Survey Data Table View
 In new dataset, school "R": 'Ryan', "J":Johntallch, rest variable name remain same as that of original dataset.
 
@@ -110,28 +111,29 @@ library(knitr)
 kable(new_data.source[1:5,], caption = "New Data set")
 ```
 
-## Comparision of alcohol consumption with sex 
+## Comparision of alcohol consumption with sex on workday
 We compared Workday alcohol consumption with age and sex from the original dataset to the new dataset and discovered that there are no high and very high consumption of alcohol in the original dataset on workday, as well as that women occupy a larger part in the very low consumption than male and almost no women found in the medium consumption of alcohol, whereas in the new dataset we discovered, which is quite strange because the consumption of alcohol is "high" and "very-high" for women as they occupy the larger area in the chart as compared to male.
 ```{r, echo=FALSE}
 ggplot(data.source, aes(x = Dalc, y = age, color = sex)) +
 geom_col()
-```
 
-```{r, echo=FALSE}
 ggplot(new_data.source, aes(x = Dalc, y = age, color = sex)) +
 geom_col()
 ```
 
-We compared Weekend alcohol consumption with age and sex from the original dataset to the new dataset and discovered that there are significant differnces as compared to that with workday alcohol consumption. As clearly seen in orginal dataset there is also "very high" and "high" consumption of alcohol. In new data set women seems to outperform male in alcohol consumption in "high" category. 
+## Comparision of alcohol consumption with sex on weekend.
+We compared Weekend alcohol consumption with age and sex from the original dataset to the new dataset and discovered that there are significant differnces as compared to that with workday alcohol consumption. As clearly seen in orginal dataset there is also "very high" and "high" consumption of alcohol. In new data set women seems to outperform male in alcohol consumption in "high" category.
+
 ```{r, echo=FALSE}
 ggplot(data.source, aes(x = Walc, y = age, color = sex)) +
 geom_col()
-```
-```{r, echo=FALSE}
+
 ggplot(new_data.source, aes(x = Walc, y = age, color = sex)) +
 geom_col()
 ```
+
 # Data Visualization 
+
 ## Scatter Plot of grade comparision
 Please see the scatter plot representations side by side on the left for the original dataset and on the right for the new survey data set. Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data scatter plot.
 
@@ -274,12 +276,7 @@ Below we have commented on our thoughts on the new survey data set and also offe
 Original Dataset:
 In the preceding regression, the adjusted R-squared is just 0.17, which is fairly low. It means that variance in everything else explains just 17% of the variation in average grades. Studytime, schoolsup, paid, and higher are the variables that have a statistically significant influence on average grade.
 
-<<<<<<< Updated upstream
-New Survey Dataset:
-
-=======
 New Survey Dataset: In the below regression, the adjusted R-squared is 0.28, which is not very high but better than the original dataset. It means that variance in everything else explains just 28% of the variation in average grades. School, Mjob, absences are the variable that have a statistically significant influence over grade.
->>>>>>> Stashed changes
 
 ```{r, echo=FALSE}
 failureind<-which(names(d3norepeats)=="failures")
@@ -412,6 +409,7 @@ rf.predictions <- predict(randfor, data_combine_norepeats)
 nmse.rf <- mean((rf.predictions - data_combine_norepeats[, "avggrades"])^2) / mean((mean(data_combine_norepeats$avggrades) - data_combine_norepeats[, "avggrades"])^2)
 print(nmse.rf) # 0.17
 ```
+
 # Random Forest
 
 Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Random Forest
