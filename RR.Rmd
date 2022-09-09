@@ -262,9 +262,10 @@ lm.predictions <- predict(lm2, d3norepeats)
 rt.predictions <- predict(rt2, d3norepeats)
 nmse.lm <- mean((lm.predictions - d3norepeats[, "avggrades"])^2) / mean((mean(d3norepeats$avggrades) - d3norepeats[, "avggrades"])^2)
 nmse.rt <- mean((rt.predictions - d3norepeats[, "avggrades"])^2) / mean((mean(d3norepeats$avggrades) - d3norepeats[, "avggrades"])^2)
-print(nmse.lm) # 0.79
+print(nmse.lm) # 0.80
 print(nmse.rt) # 0.85
 ```
+In the original, It seems that the linear model performs better than the regression tree as shown by the NMSE values. 
 
 ```{r, echo=FALSE}
 #New Survey Data
@@ -285,22 +286,21 @@ lm.predictions <- predict(lm2, data_combine_norepeats)
 rt.predictions <- predict(rt2, data_combine_norepeats)
 nmse.lm <- mean((lm.predictions - data_combine_norepeats[, "avggrades"])^2) / mean((mean(data_combine_norepeats$avggrades) - data_combine_norepeats[, "avggrades"])^2)
 nmse.rt <- mean((rt.predictions - data_combine_norepeats[, "avggrades"])^2) / mean((mean(data_combine_norepeats$avggrades) - data_combine_norepeats[, "avggrades"])^2)
-print(nmse.lm) # 0.79
-print(nmse.rt) # 0.85
+print(nmse.lm) # 0.46
+print(nmse.rt) # 0.59
 ```
+Consistently, with the original dataset, we see that in our survey data, the linear model performs better than the regression tree as shown by the NMSE values. The results are however better in the survey dataset as compared to those of the original dataset which would suggest better quality in the data obtained
+Plotted below will be error scatter plots
 
-# Linear Model 
+# Linear Model and Regression Tree
 (Predicted grades vs True grades)
-Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Linear Model 
+Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Linear Model and the regression tree 
 Original Dataset:
-The horizontal axes in the graphs above show anticipated grades, while the vertical axes represent genuine grades. If the model accurately predicts real grades, projected grades must match actual grades, and hence the scatter points should align with the 45 degree (blue) line. Unfortunately, as seen by the NMSEs and error maps, neither of the two models appears to perform a good job of forecasting student average grades. I'm not happy with the results of linear regression and regression tree models, so I'm going to try a random forest.
+The horizontal axes in the graphs below show anticipated grades, while the vertical axes represent genuine grades. If the model accurately predicts real grades, projected grades must match actual grades, and hence the scatter points should align with the 45 degree (blue) line. Unfortunately, as seen by the NMSEs and error maps, neither of the two models appears to perform a good job of forecasting student average grades. I'm not happy with the results of linear regression and regression tree models, so I'm going to try a random forest.
 
 New Survey Dataset:
+As with the original plot, the definition of the axes is consistent and as per author recommendation, we are still expecting a close resemblance between actual grades and projected grades, meaning we expect the scatter point to cluster and align along or very close to the line. As compared to the initial plot, we note an improvement in the quality of our plot as the scatter points lie closer to the "line of best fit", however, we also recommend proceeding with the random forest model as we seek the model that gives us the best possible estimation.
 
-
-# Regression Tree 
-(Predicted grades vs True grades)
-Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Regression Tree
 ```{r, echo=FALSE}
 lmpltdata1 <- data.frame(cbind(lm.predictions, d3norepeats[, "avggrades"]))
 colnames(lmpltdata1) <- c("lm.predictions", "avggrades")
@@ -373,7 +373,7 @@ set.seed(4543)
 randfor <- randomForest(avggrades ~ ., data = data_combine_norepeats[, 1:30], ntree = 500, importance = T)
 rf.predictions <- predict(randfor, data_combine_norepeats)
 nmse.rf <- mean((rf.predictions - data_combine_norepeats[, "avggrades"])^2) / mean((mean(data_combine_norepeats$avggrades) - data_combine_norepeats[, "avggrades"])^2)
-print(nmse.rf) # 0.2
+print(nmse.rf) # 0.17
 ```
 # Random Forest
 
@@ -403,38 +403,9 @@ errplt.rf1<-ggplot(rfpltdata1,aes(rf.predictions,avggrades))+
 grid.arrange(errplt.rf1, errplt.lt1,errplt.rt1,nrow=3)
 ```
 
-# Conclusion
-
-Original Dataset
-The following are the top ten most important variables influencing student average grades:
-
-Higher- want to pursue higher education (binary: yes or no)
-Medu - mother's education (numeric: 0 - no education, 1 - primary education (4th grade), 2 - secondary education or 4 - higher education)
-studytime - weekly study time (numeric: 1–2 hours, 2–2–5 hours, 3–5–10 hours, or 4–>10 hours)
-schoolsup - further educational assistance (binary: yes or no)
-Dalc - alcohol consumption throughout the daytime (numeric: from 1 - very low to 5 - very high)
-goout - a social gathering with friends (numeric: from 1 - very low to 5 - very high)
-Walc (Weekend alcohol consumption) (numeric: from 1 - very low to 5 - very high)
-reason - reason for selecting this school (nominal: proximity to 'home,' school'reputation,' course preference, or 'other')
-Fedu - father's education (numeric: 0 - no education, 1 - primary education (4th grade), 2 - secondary education or 4 - higher education)
-sex - the gender of the student (binary: 'F' - female or 'M' - male)
-
-These findings show that alcohol intake on both weekdays and weekends is an important predictor of student average grades. The removal of each of these two variables increases the MSE of predictions by 10-20%.
-
-What's remarkable about these results is that certain traits that would be assumed to be essential did not make the top ten list (I would guess that variables like Pstatus, famsupport, famrel, and absences are among those), whilst others (like higher and Medu) turned out to be quite important.
-
-In the following sections, I will create a partial dependency plot for each feature in the dataset (ranked by importance). Partial dependency plots represent the marginal influence of a characteristic on the response graphically. In this scenario, the highest performing Random Forest model with 500 trees generates partial dependencies. As the charts show, switching from "extremely low" to "low" alcohol intake on weekdays reduces the projected average grade from 11.22 to 10.88. Similarly, dropping from "extremely low" to "low" alcohol use on weekends reduces the average projected grade from 11.19 to 11.17.
-
-Finally, the effect of the two most relevant factors, "upper" and "medium," on average student grade is as follows:
-
-higher: a determination to seek higher education raises the average projected grade from 9.42 to 11.25. Thus, encouraging your children to seek higher education is the most effective way to enhance their academic performance!
-Medu: Increasing the mother's education from none to more than secondary school raises the expected average grade from 10.8 to 11.5. Thus, future parents (particularly dads) should marry intelligent people if they want their children to do well in school.
 
 
 
-```{r, echo=FALSE}
-varImpPlot(rf2,type=1) 
-```
 
 
 
@@ -455,7 +426,29 @@ errplt.rf1 <- ggplot(rfpltdata1, aes(rf.predictions, avggrades)) +
 # finally, plot the error plot from the random forest with the error plots of the linear and regression tree models.
 grid.arrange(errplt.rf1, errplt.lt1, errplt.rt1, nrow = 3)
 ```
+
+# Conclusion
+
+Original Dataset
+The findings show that alcohol intake on both weekdays and weekends is an important predictor of student average grades. The removal of each of these two variables increases the MSE of predictions by 10-20%.
+
+What's remarkable about these results is that certain traits that would be assumed to be essential did not make the top ten list (I would guess that variables like Pstatus, famsupport, famrel, and absences are among those), whilst others (like higher and Medu) turned out to be quite important.
+
+Finally, the effect of the two most relevant factors, "higher" and "medu," on average student grade is as follows:
+
+higher: a determination to seek higher education raises the average projected grade from 9.42 to 11.25. Thus, encouraging your children to seek higher education is the most effective way to enhance their academic performance!
+Medu: Increasing the mother's education from none to more than secondary school raises the expected average grade from 10.8 to 11.5. Thus, future parents (particularly dads) should marry intelligent people if they want their children to do well in school.
+
+New Dataset:
+On the new dataset we see a completely different approach. Of keynot is the scale and the rearranged order of importance in the variable importance plot. Unlike the original study (where only 2 variables lay below 5%), in the new survey we have barely 7 variables lying on and around 5%+ inclusion in the MSE. The most important is the school with which the student attends and this does have an effect logically as the demographics, teacher staffing and availability of materials does infact impact the psychological perspective of a student
+
+The number of absences with which the student has is also an important variable as removing this variable significantly increases the percentage MSE because again, logically it makes sense that a student with a higher numnber of absences will have their grades negatively affected hence the ranking of this variable higher up the hierarchy is justified.
+The mother's job, daily alcohol consumption, sex, study time and frequency of going out with friends for any of the students seems to contribute significantly on the student's average grade. Again, removing these variables significantly increases the MSE.
+
 ```{r, echo=FALSE}
-varImpPlot(randfor,type=1) 
+varImpPlot(rf2,type=1, main = "RF Variable Importance Plot (Original Data)") 
+```
+```{r, echo=FALSE}
+varImpPlot(randfor,type=1, main = "RF Variable Importance Plot (Survey Data)") 
 ```
 
