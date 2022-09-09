@@ -2,41 +2,44 @@
 title: "Alcohol Consumption and Average Grades"
 author: "Karan Vijay Kashyap, Sandile Nhlalo-Sibanda"
 date: "August, 2022"
-output: html_document
+output:
+  html_document:
+      theme: darkly
+      highlight: tango
+      toc: true
+      toc_float: true
+  
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-\centering
-
-\raggedright
-
-\abstract
-This project investigates if alcohol intake has any predictive value over average student grades. We're also curious about replicating the original study and seeing whether other factors may be major predictors of student grades. We will not attempt to forecast student grade progression across marking periods because all of the characteristics in the dataset (except grades) remain constant throughout marking periods and are basic descriptors of student backgrounds.
-
-\newpage 
 # Introduction
-The project is set up as follows.
-We first do Exploratory Data Analysis to determine whether the two tables (with math and Portuguese grades) can be integrated.
+This project seeks to determine whether alcohol consumption has any prognostic significance over average student grades.
+We're also interested in duplicating the original study to discover if additional characteristics are significant predictors of student grades. We will not attempt to estimate student grade progression over marking periods because all of the dataset's attributes (except grades) stay consistent between marking periods and are fundamental descriptors of student backgrounds.
+
+The project is organized as follows.
+
+We begin with exploratory data analysis to see if the two tables (with math and Portuguese grades from original dataset) and (with math and english grades from survey dataset) may be combined.
 
 We derive student average grades throughout grading periods by integrating the two tables and estimate three models: Linear Model, Regression Tree Model, and Random Forest Model.
 
-Later, we acquired data from a survey for English and Math grades, and we will replicate the research on a fresh dataset, estimating three models: Linear Model, Regression Tree Model, and Random Forest Model.
+Later, we acquired data from a survey for English and Math grades, and we will replicate the research on a fresh data set, estimating three models: Linear Model, Regression Tree Model, and Random Forest Model.
 
-# About Data
-While this is an excellent dataset, it lacks information on parents' income. These findings are based on surveys of students done at two Portuguese schools. As a result, I assume there shouldn't be much variety in parents' wealth (definitely not as much as in the California education system), class sizes, and computers/students. As a result, one downside (or advantage, depending on your point of view) of this dataset is that it maintains some of the crucial variables relatively constant.
-Schoolsup is a characteristic in the dataset that may be associated to parental income (extra educational support, yes or no). After higher and Medu, schoolsup is the third most important predictor of student average grades. What's more, schoolsup is inversely associated to average grades.
-
-
-## Objective of study
 The goal of this study is to determine the effect of alcohol use on students' average grades.
 
-\newpage
 
-# Load the packages
+# About Data
+Original Dataset:
+We have two csv file one for math grade and other for Portuguese grade which collected from two school and merged in one csv file based on subject. 
+Number of Columns: Both dataset have 33 columns
+Number of Rows: Maths dataset: 395, Portugese dataset: 649 
 
-```{r, include=FALSE}
+Survey Dataset:
+We have collected data using Google survey for math grade and english grade from our school friend from school name Ryan "R" and  Johntallch "J".
+Number of Columns: Both dataset have 33 columns
+Number of Rows: Both dataset have 105 rows
+
+# Exploratory Data Analysis
+```{r Load the packages, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(plyr)
 library(dplyr)
@@ -48,89 +51,132 @@ library(rpart)
 library(waffle)
 library(party)
 library(randomForest)
+library(styler)
+library(knitr)
 ```
 
+ 
+## Data Import
+```{r dataimport, echo=FALSE}
 
-# Data Analysis
+#Original data
+d1 <- read.table("student-mat.csv",sep=",",header=TRUE) #Reading Math data set
+d2 <- read.table("student-por.csv",sep=",",header=TRUE) #Reading Portuguese data set
 
-```{r, echo=FALSE}
-d1 <- read.table("student-mat.csv",sep=",",header=TRUE) #Reading Math dataset
-d2 <- read.table("student-por.csv",sep=",",header=TRUE) #Reading Portuguese dataset
+#New survey data
+data_english <- read.table("Student_English.csv",sep=",",header=TRUE) #Reading English data set
+data_maths <- read.table("Student_Maths.csv",sep=",",header=TRUE) #Reading Maths data set
 
-#****New survey data
-data_english <- read.table("Student_English.csv",sep=",",header=TRUE) #Reading English dataset
-data_maths <- read.table("Student_Maths.csv",sep=",",header=TRUE) #Reading Maths dataset
-
-colnames(data_maths)[1] <- "school"
+#Column rename
+colnames(data_maths)[1] <- "school"   #Renaming "school" column name as it was incorrect format when uploaded from csv file.
 colnames(data_english)[1] <- "school"
 ```
 
+## Original Data Table View
+```{r Data Merge for Original data, echo=FALSE}
 
-```{r, echo=FALSE}
-#merging datasets by common columns into single DS
+#merging Original data sets by common columns into single Data set
+
 data.source=merge(d1,d2,by=c("school","sex","age","address", "famsize", "Pstatus", "Medu", "Fedu", "Mjob", "Fjob", "reason", "nursery", "internet", "guardian","guardian","traveltime","studytime","failures", "schoolsup","famsup","activities","higher","romantic", "famrel", "freetime", "goout", "Dalc", "Walc", "health", "absences"))
-
-head(data.source)
 ```
 
-```{r, echo=FALSE}
-#merging NEW datasets by common columns into single DS
+
+```{r echo=FALSE, results= 'asis'}
+kable(data.source[1:5,], caption = "Original Data set")
+```
+## New Survey Data Table View
+
+```{r Data Merge for New Data, echo=FALSE}
+
+#merging New data sets by common columns into single Data set
+
 new_data.source=merge(data_english,data_maths,by=c("school","sex","age","address","famsize","Pstatus", "Medu", "Fedu", "Mjob", "Fjob", "reason", "nursery", "internet", "guardian", "guardian", "traveltime", "studytime", "failures", "schoolsup", "famsup", "activities", "higher", "romantic", "famrel", "freetime", "goout", "Dalc", "Walc", "health", "absences"))
 
-head(new_data.source)
 ```
 
-## Including Plots
+```{r echo=FALSE, results='asis'}
+library(knitr)
+kable(new_data.source[1:5,], caption = "New Data set")
+```
 
-####You can also embed plots, for example:
+# Data Visualization 
+## Scatter Plot of grade comparision
+Please see the scatter plot representations side by side on the left for the original dataset and on the right for the new survey data set. Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data scatter plot.
+
+Original Dataset:
+The two scatter plots have little meaning. First, none of the 85 students consumed excessive amounts of alcohol on a regular basis. Second, practically all of those who had pretty high scores consumed very little alcohol over the week. Third, math and Portuguese grades appear to be substantially correlated. The corrected R-squared is 0.55 when I regress Portuguese grades on math grades. This suggests that the correlation coefficient between math and Portuguese grades is around 0.74, and that change in math grades may explain approximately 55% of the variance in Portuguese grades. This, in my opinion, indicates that I may proceed with combining the two tables
+
+New Survey Dataset:
+
 
 ```{r, echo=FALSE}
-#Research Data + New Survey data
-data.source$mathgrades=rowMeans(cbind(data.source$G1.x,data.source$G2.x,data.source$G3.x))
-data.source$portgrades=rowMeans(cbind(data.source$G1.y,data.source$G2.y,data.source$G3.y))
+# Original Data
+# In this we have merged grade from period/semester 1 + period/semester 2 + period/semester 3 and calculated the mean of the grade using rowMean function, we did this separately for math grade and Portuguese grade.
+data.source$mathgrades <- rowMeans(cbind(data.source$G1.x, data.source$G2.x, data.source$G3.x))
+data.source$portgrades <- rowMeans(cbind(data.source$G1.y, data.source$G2.y, data.source$G3.y))
 
-data.source$Dalc <- as.factor(data.source$Dalc)      
-data.source$Dalc <- mapvalues(data.source$Dalc, 
-                              from = 1:5, 
-                              to = c("Very Low", "Low", "Medium", "High", "Very High"))
+data.source$Dalc <- as.factor(data.source$Dalc) # Added new column Dalc in original datasource 
+data.source$Dalc <- mapvalues(data.source$Dalc, # converted from numeric to factor
+  from = 1:5,
+  to = c("Very Low", "Low", "Medium", "High", "Very High") #Mapvalues to new variable name later will be used for ledger in plot.
+)
 
-str1=ggplot(data.source, aes(x=mathgrades, y=portgrades)) +
- geom_point(aes(colour=factor(Dalc)))+ scale_colour_hue(l=25,c=150)+
-geom_smooth(method = "lm", se = FALSE)
+#plot to compare math and portugese grade using geom smooth line.
+str1 <- ggplot(data.source, aes(x = mathgrades, y = portgrades)) + 
+  geom_point(aes(colour = factor(Dalc))) +
+  scale_colour_hue(l = 25, c = 150) +
+  geom_smooth(method = "lm", se = FALSE)
 
-data.source$Walc <- as.factor(data.source$Walc)      
-data.source$Walc <- mapvalues(data.source$Walc, 
-                              from = 1:5, 
-                              to = c("Very Low", "Low", "Medium", "High", "Very High"))
+data.source$Walc <- as.factor(data.source$Walc) # Added new column Walc in original datasource 
+data.source$Walc <- mapvalues(data.source$Walc, # converted from numeric to factor
+  from = 1:5,
+  to = c("Very Low", "Low", "Medium", "High", "Very High") #Mapvalues to new variable name later will be used for ledger in plot.
+)
 
-str2=ggplot(data.source, aes(x=mathgrades, y=portgrades))+
-geom_point(aes(colour=factor(Walc)))+ scale_colour_hue(l=25,c=150)+
-geom_smooth(method = "lm", se = FALSE)
-########################################################################
-new_data.source$mathgrades=rowMeans(cbind(new_data.source$G1.x,new_data.source$G2.x,new_data.source$G3.x))
-new_data.source$enggrades=rowMeans(cbind(new_data.source$G1.y,new_data.source$G2.y,new_data.source$G3.y))
+# second plot to compare math and portugese grade using geom smooth line.
+str2 <- ggplot(data.source, aes(x = mathgrades, y = portgrades)) +
+  geom_point(aes(colour = factor(Walc))) +
+  scale_colour_hue(l = 25, c = 150) +
+  geom_smooth(method = "lm", se = FALSE)
 
-new_data.source$Dalc <- as.factor(new_data.source$Dalc)      
-new_data.source$Dalc <- mapvalues(new_data.source$Dalc, 
-                              from = 1:5, 
-                              to = c("Very Low", "Low", "Medium", "High", "Very High"))
+#New Survey data 
+# In this we have merged grade from period/semester 1 + period/semester 2 + period/semester 3 and calculated the mean of the grade using rowMean function, we did this separately for math grade and english grade
+new_data.source$mathgrades <- rowMeans(cbind(new_data.source$G1.x, new_data.source$G2.x, new_data.source$G3.x))
+new_data.source$enggrades <- rowMeans(cbind(new_data.source$G1.y, new_data.source$G2.y, new_data.source$G3.y))
 
-new_str1=ggplot(new_data.source, aes(x=mathgrades, y=enggrades)) +
- geom_point(aes(colour=factor(Dalc)))+ scale_colour_hue(l=25,c=150)+
-geom_smooth(method = "lm", se = FALSE)
+new_data.source$Dalc <- as.factor(new_data.source$Dalc)
+new_data.source$Dalc <- mapvalues(new_data.source$Dalc,
+  from = 1:5,
+  to = c("Very Low", "Low", "Medium", "High", "Very High")
+)
+#plot to compare math and english grade using geom smooth line 
+new_str1 <- ggplot(new_data.source, aes(x = mathgrades, y = enggrades)) +
+  geom_point(aes(colour = factor(Dalc))) +
+  scale_colour_hue(l = 25, c = 150) +
+  geom_smooth(method = "lm", se = FALSE)
 
-new_data.source$Walc <- as.factor(new_data.source$Walc)      
-new_data.source$Walc <- mapvalues(new_data.source$Walc, 
-                              from = 1:5, 
-                              to = c("Very Low", "Low", "Medium", "High", "Very High"))
+new_data.source$Walc <- as.factor(new_data.source$Walc)
+new_data.source$Walc <- mapvalues(new_data.source$Walc,
+  from = 1:5,
+  to = c("Very Low", "Low", "Medium", "High", "Very High")
+)
+# second plot to compare math and english grade using geom smooth line.
+new_str2 <- ggplot(new_data.source, aes(x = mathgrades, y = enggrades)) +
+  geom_point(aes(colour = factor(Walc))) +
+  scale_colour_hue(l = 25, c = 150) +
+  geom_smooth(method = "lm", se = FALSE)
 
-new_str2=ggplot(new_data.source, aes(x=mathgrades, y=enggrades))+
-geom_point(aes(colour=factor(Walc)))+ scale_colour_hue(l=25,c=150)+
-geom_smooth(method = "lm", se = FALSE)
 
-grid.arrange(str1, new_str1, str2, new_str2,nrow=2)
+grid.arrange(str1, new_str1, str2, new_str2, nrow = 2) #Side by side presentation of scatterplot
 ```
 
+
+## Boxplot of average subject grades by daily alcohol consumption.
+Please see the basic plot representations below for the original dataset and  for the new survey data set. Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original basic box plot.
+Original Dataset:
+The median average grade is noticeably higher among students who consume relatively little alcohol on a regular basis. The median grade of students with medium, high, and very high levels of daily alcohol intake, on the other hand, did not appear to be significantly different. As my first attempt at predicting average grades using all other factors, I will 1) do a multiple linear regression and 2) construct a regression tree of average grades on all other variables.Because variable "failures" is closely connected to my goal variable, avggrades, and both indicate the same general student aptitude (therefore it is more of a target than a feature), I am likely to delete variable "failures" from the dataset.
+
+New Survey Dataset:
 
 ```{r, echo=FALSE}
 d3<-rbind(d1,d2) #combine the two datasets
@@ -148,45 +194,53 @@ d3norepeats<-d3norepeats[,-(31:33)]
 
 
 ```{r, echo=FALSE}
-#New Survey Data
-data_combine<-rbind(data_english,data_maths) #combine the two datasets
+# New Survey Data
+data_combine <- rbind(data_english, data_maths) # combine the two datasets
 # and eliminate the repeats:
-data_combine_norepeats<-data_combine %>% distinct(school,sex,age,address,famsize,Pstatus,
-                Medu,Fedu,Mjob,Fjob,reason,
-                guardian,traveltime,studytime,failures,
-                schoolsup, famsup,activities,nursery,higher,internet,
-                romantic,famrel,freetime,goout,Dalc,Walc,health,absences, .keep_all = TRUE)
-#add a column with average grades (math or Portuguese, whichever is available)
-data_combine_norepeats$avggrades=rowMeans(cbind(data_combine_norepeats$G1,data_combine_norepeats$G2,data_combine_norepeats$G3))
+data_combine_norepeats <- data_combine %>% distinct(school, sex, age, address, famsize, Pstatus,
+  Medu, Fedu, Mjob, Fjob, reason,
+  guardian, traveltime, studytime, failures,
+  schoolsup, famsup, activities, nursery, higher, internet,
+  romantic, famrel, freetime, goout, Dalc, Walc, health, absences,
+  .keep_all = TRUE
+)
+# add a column with average grades (math or Portuguese, whichever is available)
+data_combine_norepeats$avggrades <- rowMeans(cbind(data_combine_norepeats$G1, data_combine_norepeats$G2, data_combine_norepeats$G3))
 # and drop grades in 3 marking periods.
-data_combine_norepeats<-data_combine_norepeats[,-(31:33)]
+data_combine_norepeats <- data_combine_norepeats[, -(31:33)]
 ```
 
 
 ```{r, echo=FALSE}
-ggplot(d3norepeats, aes(x=Dalc, y=avggrades, group=Dalc))+
-  geom_boxplot()+
-  theme(legend.position="none")+
-  #scale_fill_manual(values=waffle.col)+
-  xlab("Daily Alcohol consumption")+
-  ylab("Average Grades")+
+ggplot(d3norepeats, aes(x = Dalc, y = avggrades, group = Dalc)) +
+  geom_boxplot() +
+  theme(legend.position = "none") +
+  # scale_fill_manual(values=waffle.col)+
+  xlab("Daily Alcohol consumption") +
+  ylab("Average Grades") +
   ggtitle("Average Grade (Original Study)")
 ```
 
 
 ```{r, echo=FALSE}
-#New Survey Data
-ggplot(data_combine_norepeats, aes(x=Dalc, y=avggrades, group=Dalc))+
-  geom_boxplot()+
-  theme(legend.position="none")+
-  #scale_fill_manual(values=waffle.col)+
-  xlab("Daily Alcohol consumption")+
-  ylab("Average Grades")+
+# New Survey Data
+ggplot(data_combine_norepeats, aes(x = Dalc, y = avggrades, group = Dalc)) +
+  geom_boxplot() +
+  theme(legend.position = "none") +
+  # scale_fill_manual(values=waffle.col)+
+  xlab("Daily Alcohol consumption") +
+  ylab("Average Grades") +
   ggtitle("Average Grade (Reproducible Survey)")
 
 ```
 
+# Adjusted R-squared
+Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of adjusted R-squared
 
+Original Dataset:
+In the preceding regression, the adjusted R-squared is just 0.17, which is fairly low. It means that variance in everything else explains just 17% of the variation in average grades. Studytime, schoolsup, paid, and higher are the variables that have a statistically significant influence on average grade.
+
+New Survey Dataset:
 ```{r, echo=FALSE}
 failureind<-which(names(d3norepeats)=="failures")
 d3norepeats<-d3norepeats[,-failureind]
@@ -199,14 +253,14 @@ summary(lm2)
 
 
 ```{r, echo=FALSE}
-#predictions
-rt2<-rpart(avggrades~., data=d3norepeats[,1:30])
-lm.predictions<-predict(lm2,d3norepeats)
-rt.predictions<-predict(rt2,d3norepeats)
-nmse.lm<-mean((lm.predictions-d3norepeats[,"avggrades"])^2)/mean((mean(d3norepeats$avggrades)-d3norepeats[,"avggrades"])^2)
-nmse.rt<-mean((rt.predictions-d3norepeats[,"avggrades"])^2)/mean((mean(d3norepeats$avggrades)-d3norepeats[,"avggrades"])^2)
-print(nmse.lm) #0.79
-print(nmse.rt) #0.85
+# predictions
+rt2 <- rpart(avggrades ~ ., data = d3norepeats[, 1:30])
+lm.predictions <- predict(lm2, d3norepeats)
+rt.predictions <- predict(rt2, d3norepeats)
+nmse.lm <- mean((lm.predictions - d3norepeats[, "avggrades"])^2) / mean((mean(d3norepeats$avggrades) - d3norepeats[, "avggrades"])^2)
+nmse.rt <- mean((rt.predictions - d3norepeats[, "avggrades"])^2) / mean((mean(d3norepeats$avggrades) - d3norepeats[, "avggrades"])^2)
+print(nmse.lm) # 0.79
+print(nmse.rt) # 0.85
 ```
 
 ```{r, echo=FALSE}
@@ -223,94 +277,114 @@ summary(lm2)
 ```{r, echo=FALSE}
 #New Survey Data
 #predictions
-rt2<-rpart(avggrades~., data=data_combine_norepeats[,1:30])
-lm.predictions<-predict(lm2,data_combine_norepeats)
-rt.predictions<-predict(rt2,data_combine_norepeats)
-nmse.lm<-mean((lm.predictions-data_combine_norepeats[,"avggrades"])^2)/mean((mean(data_combine_norepeats$avggrades)-data_combine_norepeats[,"avggrades"])^2)
-nmse.rt<-mean((rt.predictions-data_combine_norepeats[,"avggrades"])^2)/mean((mean(data_combine_norepeats$avggrades)-data_combine_norepeats[,"avggrades"])^2)
-print(nmse.lm) #0.79
-print(nmse.rt) #0.85
+rt2 <- rpart(avggrades ~ ., data = data_combine_norepeats[, 1:30])
+lm.predictions <- predict(lm2, data_combine_norepeats)
+rt.predictions <- predict(rt2, data_combine_norepeats)
+nmse.lm <- mean((lm.predictions - data_combine_norepeats[, "avggrades"])^2) / mean((mean(data_combine_norepeats$avggrades) - data_combine_norepeats[, "avggrades"])^2)
+nmse.rt <- mean((rt.predictions - data_combine_norepeats[, "avggrades"])^2) / mean((mean(data_combine_norepeats$avggrades) - data_combine_norepeats[, "avggrades"])^2)
+print(nmse.lm) # 0.79
+print(nmse.rt) # 0.85
 ```
 
+# Linear Model 
+(Predicted grades vs True grades)
+Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Linear Model 
+Original Dataset:
+The horizontal axes in the graphs above show anticipated grades, while the vertical axes represent genuine grades. If the model accurately predicts real grades, projected grades must match actual grades, and hence the scatter points should align with the 45 degree (blue) line. Unfortunately, as seen by the NMSEs and error maps, neither of the two models appears to perform a good job of forecasting student average grades. I'm not happy with the results of linear regression and regression tree models, so I'm going to try a random forest.
 
+New Survey Dataset:
+
+# Regression Tree 
+(Predicted grades vs True grades)
+Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Regression Tree
 ```{r, echo=FALSE}
-lmpltdata1=data.frame(cbind(lm.predictions,d3norepeats[,"avggrades"]))
-colnames(lmpltdata1)<-c("lm.predictions","avggrades")
-rtpltdata1=data.frame(cbind(rt.predictions,d3norepeats[,"avggrades"]))
-colnames(rtpltdata1)<-c("rt.predictions","avggrades")
+lmpltdata1 <- data.frame(cbind(lm.predictions, d3norepeats[, "avggrades"]))
+colnames(lmpltdata1) <- c("lm.predictions", "avggrades")
+rtpltdata1 <- data.frame(cbind(rt.predictions, d3norepeats[, "avggrades"]))
+colnames(rtpltdata1) <- c("rt.predictions", "avggrades")
 
-d3norepeats$Dalc<-as.factor(d3norepeats$Dalc)
+d3norepeats$Dalc <- as.factor(d3norepeats$Dalc)
 
-errplt.lt1=ggplot(lmpltdata1,aes(lm.predictions,avggrades))+
-                  geom_point(aes(color=d3norepeats[,"Dalc"]))+
-                  xlab("Predicted Grades (Linear Model)")+
-                  ylab("Actual Grades")+
-                  geom_abline(intercept=0,slope=1,color="#0066CC",size=1)+
-                  #geom_smooth(method = "lm", se = FALSE)+
-                  scale_colour_brewer(palette = "Set1",name = "Daily Alcohol \nConsumption")
+errplt.lt1 <- ggplot(lmpltdata1, aes(lm.predictions, avggrades)) +
+  geom_point(aes(color = d3norepeats[, "Dalc"])) +
+  xlab("Predicted Grades (Linear Model)") +
+  ylab("Actual Grades") +
+  geom_abline(intercept = 0, slope = 1, color = "#0066CC", size = 1) +
+  # geom_smooth(method = "lm", se = FALSE)+
+  scale_colour_brewer(palette = "Set1", name = "Daily Alcohol \nConsumption")
 
-errplt.rt1=ggplot(rtpltdata1,aes(rt.predictions,avggrades))+
-  geom_point(aes(color=d3norepeats[,"Dalc"]))+
-  xlab("Predicted Grades (Regression Tree)")+
-  ylab("Actual Grades")+
-  geom_abline(intercept=0,slope=1,color="#0066CC",size=1)+
-  #geom_smooth(method = "lm", se = FALSE)+
-  scale_colour_brewer(palette = "Set1",name = "Daily Alcohol \nConsumption")
+errplt.rt1 <- ggplot(rtpltdata1, aes(rt.predictions, avggrades)) +
+  geom_point(aes(color = d3norepeats[, "Dalc"])) +
+  xlab("Predicted Grades (Regression Tree)") +
+  ylab("Actual Grades") +
+  geom_abline(intercept = 0, slope = 1, color = "#0066CC", size = 1) +
+  # geom_smooth(method = "lm", se = FALSE)+
+  scale_colour_brewer(palette = "Set1", name = "Daily Alcohol \nConsumption")
 
-grid.arrange(errplt.lt1,errplt.rt1,nrow=2)
+grid.arrange(errplt.lt1, errplt.rt1, nrow = 2)
 ```
+
+
+
 ```{r, echo=FALSE}
 library(randomForest)
 set.seed(4543)
-rf2<-randomForest(avggrades~., data=d3norepeats[,1:30], ntree=500, importance=T)
-rf.predictions<-predict(rf2,d3norepeats)
-nmse.rf<-mean((rf.predictions-d3norepeats[,"avggrades"])^2)/mean((mean(d3norepeats$avggrades)-d3norepeats[,"avggrades"])^2)
-print(nmse.rf) #0.2
+rf2 <- randomForest(avggrades ~ ., data = d3norepeats[, 1:30], ntree = 500, importance = T)
+rf.predictions <- predict(rf2, d3norepeats)
+nmse.rf <- mean((rf.predictions - d3norepeats[, "avggrades"])^2) / mean((mean(d3norepeats$avggrades) - d3norepeats[, "avggrades"])^2)
+print(nmse.rf) # 0.2
 ```
 
 
 ```{r, echo=FALSE}
 #New Survey Data
-lmpltdata1=data.frame(cbind(lm.predictions,data_combine_norepeats[,"avggrades"]))
-colnames(lmpltdata1)<-c("lm.predictions","avggrades")
-rtpltdata1=data.frame(cbind(rt.predictions,data_combine_norepeats[,"avggrades"]))
-colnames(rtpltdata1)<-c("rt.predictions","avggrades")
+lmpltdata1 <- data.frame(cbind(lm.predictions, data_combine_norepeats[, "avggrades"]))
+colnames(lmpltdata1) <- c("lm.predictions", "avggrades")
+rtpltdata1 <- data.frame(cbind(rt.predictions, data_combine_norepeats[, "avggrades"]))
+colnames(rtpltdata1) <- c("rt.predictions", "avggrades")
 
-data_combine_norepeats$Dalc<-as.factor(data_combine_norepeats$Dalc)
+data_combine_norepeats$Dalc <- as.factor(data_combine_norepeats$Dalc)
 
-errplt.lt1=ggplot(lmpltdata1,aes(lm.predictions,avggrades))+
-                  geom_point(aes(color=data_combine_norepeats[,"Dalc"]))+
-                  xlab("Predicted Grades (Linear Model)")+
-                  ylab("Actual Grades")+
-                  geom_abline(intercept=0,slope=1,color="#0066CC",size=1)+
-                  #geom_smooth(method = "lm", se = FALSE)+
-                  scale_colour_brewer(palette = "Set1",name = "Daily Alcohol \nConsumption")
+errplt.lt1 <- ggplot(lmpltdata1, aes(lm.predictions, avggrades)) +
+  geom_point(aes(color = data_combine_norepeats[, "Dalc"])) +
+  xlab("Predicted Grades (Linear Model)") +
+  ylab("Actual Grades") +
+  geom_abline(intercept = 0, slope = 1, color = "#0066CC", size = 1) +
+  # geom_smooth(method = "lm", se = FALSE)+
+  scale_colour_brewer(palette = "Set1", name = "Daily Alcohol \nConsumption")
 
-errplt.rt1=ggplot(rtpltdata1,aes(rt.predictions,avggrades))+
-  geom_point(aes(color=data_combine_norepeats[,"Dalc"]))+
-  xlab("Predicted Grades (Regression Tree)")+
-  ylab("Actual Grades")+
-  geom_abline(intercept=0,slope=1,color="#0066CC",size=1)+
-  #geom_smooth(method = "lm", se = FALSE)+
-  scale_colour_brewer(palette = "Set1",name = "Daily Alcohol \nConsumption")
+errplt.rt1 <- ggplot(rtpltdata1, aes(rt.predictions, avggrades)) +
+  geom_point(aes(color = data_combine_norepeats[, "Dalc"])) +
+  xlab("Predicted Grades (Regression Tree)") +
+  ylab("Actual Grades") +
+  geom_abline(intercept = 0, slope = 1, color = "#0066CC", size = 1) +
+  # geom_smooth(method = "lm", se = FALSE)+
+  scale_colour_brewer(palette = "Set1", name = "Daily Alcohol \nConsumption")
 
-grid.arrange(errplt.lt1,errplt.rt1,nrow=2)
+grid.arrange(errplt.lt1, errplt.rt1, nrow = 2)
 ```
 ```{r, echo=FALSE}
 library(randomForest)
 set.seed(4543)
-randfor<-randomForest(avggrades~., data=data_combine_norepeats[,1:30], ntree=500, importance=T)
-rf.predictions<-predict(randfor,data_combine_norepeats)
-nmse.rf<-mean((rf.predictions-data_combine_norepeats[,"avggrades"])^2)/mean((mean(data_combine_norepeats$avggrades)-data_combine_norepeats[,"avggrades"])^2)
-print(nmse.rf) #0.2
+randfor <- randomForest(avggrades ~ ., data = data_combine_norepeats[, 1:30], ntree = 500, importance = T)
+rf.predictions <- predict(randfor, data_combine_norepeats)
+nmse.rf <- mean((rf.predictions - data_combine_norepeats[, "avggrades"])^2) / mean((mean(data_combine_norepeats$avggrades) - data_combine_norepeats[, "avggrades"])^2)
+print(nmse.rf) # 0.2
 ```
+# Random Forest
 
+Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Random Forest
+Original Dataset:
+The random forest implementation has an NMSE of 0.2, which is significantly lower than the NMSEs of the linear and regression tree models. As a validation, I will acquire the random forest error plot and compare it to the error plots produced before for the linear and regression tree models.
 
+Despite the fact that random forest appears to regularly underpredict low grade earners and overpredict high grade earners, random forest appears to be a considerably better predictor of average grades than either the linear regression or regression tree model. 10 x 5 fold cross validation on my local machine confirms that the RF model with 500 trees is the best predictor of average student grades out of the three models that I executed here (somehow Kaggle's notebook environment keeps reconnecting and is unable to run the cross-validation code in the notebook environment). With 500 points, I illustrate the relative relevance of all the characteristics in the dataset as determined by the Random Forest.
+
+New Dataset:
 
 ```{r, echo=FALSE}
-#first combine the rf predictions and actual scores in a single data frame
-rfpltdata1=data.frame(cbind(rf.predictions,d3norepeats[,"avggrades"]))
-colnames(rfpltdata1)<-c("rf.predictions","avggrades")
+# first combine the rf predictions and actual scores in a single data frame
+rfpltdata1 <- data.frame(cbind(rf.predictions, d3norepeats[, "avggrades"]))
+colnames(rfpltdata1) <- c("rf.predictions", "avggrades")
 
 # then create the error plot.
 errplt.rf1<-ggplot(rfpltdata1,aes(rf.predictions,avggrades))+
@@ -323,6 +397,34 @@ errplt.rf1<-ggplot(rfpltdata1,aes(rf.predictions,avggrades))+
 #finally, plot the error plot from the random forest with the error plots of the linear and regression tree models.
 grid.arrange(errplt.rf1, errplt.lt1,errplt.rt1,nrow=3)
 ```
+
+# Conclusion
+
+Original Dataset
+The following are the top ten most important variables influencing student average grades:
+
+Higher- want to pursue higher education (binary: yes or no)
+Medu - mother's education (numeric: 0 - no education, 1 - primary education (4th grade), 2 - secondary education or 4 - higher education)
+studytime - weekly study time (numeric: 1–2 hours, 2–2–5 hours, 3–5–10 hours, or 4–>10 hours)
+schoolsup - further educational assistance (binary: yes or no)
+Dalc - alcohol consumption throughout the daytime (numeric: from 1 - very low to 5 - very high)
+goout - a social gathering with friends (numeric: from 1 - very low to 5 - very high)
+Walc (Weekend alcohol consumption) (numeric: from 1 - very low to 5 - very high)
+reason - reason for selecting this school (nominal: proximity to 'home,' school'reputation,' course preference, or 'other')
+Fedu - father's education (numeric: 0 - no education, 1 - primary education (4th grade), 2 - secondary education or 4 - higher education)
+sex - the gender of the student (binary: 'F' - female or 'M' - male)
+
+These findings show that alcohol intake on both weekdays and weekends is an important predictor of student average grades. The removal of each of these two variables increases the MSE of predictions by 10-20%.
+
+What's remarkable about these results is that certain traits that would be assumed to be essential did not make the top ten list (I would guess that variables like Pstatus, famsupport, famrel, and absences are among those), whilst others (like higher and Medu) turned out to be quite important.
+
+In the following sections, I will create a partial dependency plot for each feature in the dataset (ranked by importance). Partial dependency plots represent the marginal influence of a characteristic on the response graphically. In this scenario, the highest performing Random Forest model with 500 trees generates partial dependencies. As the charts show, switching from "extremely low" to "low" alcohol intake on weekdays reduces the projected average grade from 11.22 to 10.88. Similarly, dropping from "extremely low" to "low" alcohol use on weekends reduces the average projected grade from 11.19 to 11.17.
+
+Finally, the effect of the two most relevant factors, "upper" and "medium," on average student grade is as follows:
+
+higher: a determination to seek higher education raises the average projected grade from 9.42 to 11.25. Thus, encouraging your children to seek higher education is the most effective way to enhance their academic performance!
+Medu: Increasing the mother's education from none to more than secondary school raises the expected average grade from 10.8 to 11.5. Thus, future parents (particularly dads) should marry intelligent people if they want their children to do well in school.
+
 ```{r, echo=FALSE}
 varImpPlot(rf2,type=1) 
 ```
@@ -336,20 +438,17 @@ rfpltdata1=data.frame(cbind(rf.predictions,data_combine_norepeats[,"avggrades"])
 colnames(rfpltdata1)<-c("rf.predictions","avggrades")
 
 # then create the error plot.
-errplt.rf1<-ggplot(rfpltdata1,aes(rf.predictions,avggrades))+
-  geom_point(aes(color=data_combine_norepeats[,"Dalc"]))+
-  xlab("Predicted Grades (Random Forest with 500 Trees)")+
-  ylab("Actual Grades")+
-  geom_abline(intercept=0,slope=1,color="#0066CC",size=1)+
-  #geom_smooth(method = "lm", se = FALSE)+
-  scale_colour_brewer(palette = "Set1",name = "Daily Alcohol \nConsumption")
-#finally, plot the error plot from the random forest with the error plots of the linear and regression tree models.
-grid.arrange(errplt.rf1, errplt.lt1,errplt.rt1,nrow=3)
+errplt.rf1 <- ggplot(rfpltdata1, aes(rf.predictions, avggrades)) +
+  geom_point(aes(color = data_combine_norepeats[, "Dalc"])) +
+  xlab("Predicted Grades (Random Forest with 500 Trees)") +
+  ylab("Actual Grades") +
+  geom_abline(intercept = 0, slope = 1, color = "#0066CC", size = 1) +
+  # geom_smooth(method = "lm", se = FALSE)+
+  scale_colour_brewer(palette = "Set1", name = "Daily Alcohol \nConsumption")
+# finally, plot the error plot from the random forest with the error plots of the linear and regression tree models.
+grid.arrange(errplt.rf1, errplt.lt1, errplt.rt1, nrow = 3)
 ```
 ```{r, echo=FALSE}
 varImpPlot(randfor,type=1) 
 ```
-########################################################################
-########################################################################
-########################################################################
 
