@@ -111,27 +111,6 @@ library(knitr)
 kable(new_data.source[1:5,], caption = "New Data set")
 ```
 
-## Comparision of alcohol consumption with sex on workday
-We compared Workday alcohol consumption with age and sex from the original dataset to the new dataset and discovered that there are no high and very high consumption of alcohol in the original dataset on workday, as well as that women occupy a larger part in the very low consumption than male and almost no women found in the medium consumption of alcohol, whereas in the new dataset we discovered, which is quite strange because the consumption of alcohol is "high" and "very-high" for women as they occupy the larger area in the chart as compared to male.
-```{r, echo=FALSE}
-ggplot(data.source, aes(x = Dalc, y = age, color = sex)) +
-geom_col()
-
-ggplot(new_data.source, aes(x = Dalc, y = age, color = sex)) +
-geom_col()
-```
-
-## Comparision of alcohol consumption with sex on weekend.
-We compared Weekend alcohol consumption with age and sex from the original dataset to the new dataset and discovered that there are significant differnces as compared to that with workday alcohol consumption. As clearly seen in orginal dataset there is also "very high" and "high" consumption of alcohol. In new data set women seems to outperform male in alcohol consumption in "high" category.
-
-```{r, echo=FALSE}
-ggplot(data.source, aes(x = Walc, y = age, color = sex)) +
-geom_col()
-
-ggplot(new_data.source, aes(x = Walc, y = age, color = sex)) +
-geom_col()
-```
-
 # Data Visualization 
 
 ## Scatter Plot of grade comparision
