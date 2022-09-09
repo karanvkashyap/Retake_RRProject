@@ -177,6 +177,7 @@ Original Dataset:
 The median average grade is noticeably higher among students who consume relatively little alcohol on a regular basis. The median grade of students with medium, high, and very high levels of daily alcohol intake, on the other hand, did not appear to be significantly different. As my first attempt at predicting average grades using all other factors, I will 1) do a multiple linear regression and 2) construct a regression tree of average grades on all other variables.Because variable "failures" is closely connected to my goal variable, avggrades, and both indicate the same general student aptitude (therefore it is more of a target than a feature), I am likely to delete variable "failures" from the dataset.
 
 New Survey Dataset:
+Unlike the original dataset, The median average grade differs significantly and is somewhat of an inverted normal distribution looking at it as students who consume relatively little alcohol and those who consume relatively high volumes of alcohol appear to have high Median average grades. Students who however have medium average consumption seem to have the lowest median average grades compared to the rest, thereby producing an inverted bell shaped distribution. It is however of key point to note that the distribution spread in average grades decreases with increased alcohol consumption as we see a decreased number of outliers as the intake scale increases, together with the shrink in the IQR ranges as well
 
 ```{r, echo=FALSE}
 d3<-rbind(d1,d2) #combine the two datasets
@@ -241,6 +242,8 @@ Original Dataset:
 In the preceding regression, the adjusted R-squared is just 0.17, which is fairly low. It means that variance in everything else explains just 17% of the variation in average grades. Studytime, schoolsup, paid, and higher are the variables that have a statistically significant influence on average grade.
 
 New Survey Dataset:
+
+
 ```{r, echo=FALSE}
 failureind<-which(names(d3norepeats)=="failures")
 d3norepeats<-d3norepeats[,-failureind]
@@ -293,6 +296,7 @@ Original Dataset:
 The horizontal axes in the graphs above show anticipated grades, while the vertical axes represent genuine grades. If the model accurately predicts real grades, projected grades must match actual grades, and hence the scatter points should align with the 45 degree (blue) line. Unfortunately, as seen by the NMSEs and error maps, neither of the two models appears to perform a good job of forecasting student average grades. I'm not happy with the results of linear regression and regression tree models, so I'm going to try a random forest.
 
 New Survey Dataset:
+
 
 # Regression Tree 
 (Predicted grades vs True grades)
@@ -381,6 +385,7 @@ Despite the fact that random forest appears to regularly underpredict low grade 
 
 New Dataset:
 
+
 ```{r, echo=FALSE}
 # first combine the rf predictions and actual scores in a single data frame
 rfpltdata1 <- data.frame(cbind(rf.predictions, d3norepeats[, "avggrades"]))
@@ -424,6 +429,8 @@ Finally, the effect of the two most relevant factors, "upper" and "medium," on a
 
 higher: a determination to seek higher education raises the average projected grade from 9.42 to 11.25. Thus, encouraging your children to seek higher education is the most effective way to enhance their academic performance!
 Medu: Increasing the mother's education from none to more than secondary school raises the expected average grade from 10.8 to 11.5. Thus, future parents (particularly dads) should marry intelligent people if they want their children to do well in school.
+
+
 
 ```{r, echo=FALSE}
 varImpPlot(rf2,type=1) 
