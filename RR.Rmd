@@ -12,14 +12,14 @@ output:
 ---
 
 # Introduction
-This project seeks to determine whether alcohol consumption has any prognostic significance over average student grades.
-We're also interested in duplicating the original study to discover if additional characteristics are significant predictors of student grades. We will not attempt to estimate student grade progression over marking periods because all of the dataset's attributes (except grades) stay consistent between marking periods and are fundamental descriptors of student backgrounds.
+This project seeks to reproduce the research previously done on the determination of whether alcohol consumption has any prognostic significance over average student grades.
+We're also interested in duplicating the original study to verify the correctness and if additional characteristics are significant predictors of student grades. Like the original author, we will not attempt to estimate student grade progression over marking periods because all of the dataset's attributes (except grades) stay consistent between marking periods and are fundamental descriptors of student backgrounds.
 
-The project is organized as follows.
+The project is organization of the project will follow the outline that resembles that of the original research's author (though will have some additions and some subtractions). The general structure will be as follows:
 
-We begin with exploratory data analysis to see if the two tables (with math and Portuguese grades from original dataset) and (with math and english grades from survey dataset) may be combined.
+In the beginning, we will start with exploratory data analysis to see if the two tables (with math and Portuguese grades from original dataset) and (with math and english grades from survey dataset) may be combined.
 
-We derive student average grades throughout grading periods by integrating the two tables and estimate three models: Linear Model, Regression Tree Model, and Random Forest Model.
+We will then derive student average grades throughout grading periods by integrating the two tables and estimate three models: Linear Model, Regression Tree Model, and Random Forest Model.
 
 Later, we acquired data from a survey for English and Math grades, and we will replicate the research on a fresh data set, estimating three models: Linear Model, Regression Tree Model, and Random Forest Model.
 
