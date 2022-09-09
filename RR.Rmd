@@ -31,6 +31,7 @@ Original Dataset:
 We have two csv file one for math grade and other for Portuguese grade which collected from two school and merged in one csv file based on subject. 
 Number of Columns: Both dataset have 33 columns
 Number of Rows: Maths dataset: 395, Portugese dataset: 649 
+Kaggle Link: "https://www.kaggle.com/code/calcifer/alcohol-consumption-and-average-grades/notebook"
 
 Survey Dataset:
 We have collected data using Google survey for math grade and english grade from our school friend from school name Ryan "R" and  Johntallch "J".
@@ -38,6 +39,8 @@ Number of Columns: Both dataset have 33 columns
 Number of Rows: Both dataset have 105 rows
 
 # Exploratory Data Analysis
+In this Exploratory Data Analysis, we will undertake preliminary investigations on original and collected datasets in order to uncover patterns, spot anomalies, test hypotheses, and evaluate assumptions using summary statistics and graphical representations.
+
 ```{r Load the packages, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
@@ -57,6 +60,12 @@ library(knitr)
 
  
 ## Data Import
+Original Dataset
+We will import the data from a delimited csv file, we have original data set "student-mat.csv" which contains maths grades and "student-por.csv" which contains Portuguese grade, All column name are similar in both the data set.
+
+New Dataset
+We will import the data from a delimited csv file, we have gathered new data set "Student_Maths.csv"  which contains maths grades and "Student_English.csv"  which contains English grade, All column name are similar in both the data set.
+
 ```{r dataimport, echo=FALSE}
 
 #Original data
@@ -73,6 +82,7 @@ colnames(data_english)[1] <- "school"
 ```
 
 ## Original Data Table View
+In original Data Table, Please find complete details about the column name: Student's school (binary: 'GP' - Gabriel Pereira or 'MS' - Mousinho da Silveira), sex: "M" - Male, "F" - Female, age: student age ,Address:"U" - Urban,"R" Rural, famsize: - "GT3" - Greater than 3, "LT3" - Less than 3, Pstatus (Parent cohabitation Status): "T": Together, "A": Apart, Medu (Mother Education):(numeric: 0 - none, 1 - primary education (4th grade), 2 - 5th to 9th grade, 3 - secondary to higher secondary, 4 - University and above,  Fedu (Father's education): (numeric: 0 - none, 1 - primary education (4th grade), 2 - 5th to 9th grade, 3 - secondary to higher secondary, 4 - University and above, Mjob (Mother's job): at_home,teacher,services,health,other, Fjob (Father's Job): at_home,teacher,services,health,other, reason (reason to choose this school): close to home, school repuation, course preference,other, traveltime - Home to school travel time (numeric: 1 - upto 15 min., 2 - 15 to 30 min., 3 - 30 min. to 1 hour, or 4 - above 1 hour), studytime - Weekly study time (numeric: 1 - less than 2 hours, 2 - 2 to 5 hours, 3 - 5 to 10 hours, or 4 - more than 10 hours),  failures - Number of past class failures: 1,2,3,4, schoolsup - Extra educational support (binary: yes or no), famsup - Family educational support (binary: yes or no), activities - Extra-curricular activities (binary: yes or no),nursery - Attended nursery school (binary: yes or no), higher - Wants to take higher education (binary: yes or no),internet - Internet access at home (binary: yes or no), romantic - With a romantic relationship (binary: yes or no),  freetime - Free time after school (numeric: from 1 - very low to 5 - very high), goout - Going out with friends (numeric: from 1 - very low to 5 - very high), Dalc - Workday alcohol consumption (numeric: from 1 - very low to 5 - very high), Walc - Weekend alcohol consumption (numeric: from 1 - very low to 5 - very high),  health - Current health status (numeric: from 1 - very bad to 5 - very good),  G1 -  First period grade (numeric: from 0 to 20),  G2 - Second period grade (numeric: from 0 to 20), G3 - Final grade (numeric: from 0 to 20, output target).
 ```{r Data Merge for Original data, echo=FALSE}
 
 #merging Original data sets by common columns into single Data set
@@ -85,6 +95,7 @@ data.source=merge(d1,d2,by=c("school","sex","age","address", "famsize", "Pstatus
 kable(data.source[1:5,], caption = "Original Data set")
 ```
 ## New Survey Data Table View
+In new dataset, school "R": 'Ryan', "J":Johntallch, rest variable name remain same as that of original dataset.
 
 ```{r Data Merge for New Data, echo=FALSE}
 
@@ -99,24 +110,46 @@ library(knitr)
 kable(new_data.source[1:5,], caption = "New Data set")
 ```
 
+## Comparision of alcohol consumption with sex 
+We compared Workday alcohol consumption with age and sex from the original dataset to the new dataset and discovered that there are no high and very high consumption of alcohol in the original dataset on workday, as well as that women occupy a larger part in the very low consumption than male and almost no women found in the medium consumption of alcohol, whereas in the new dataset we discovered, which is quite strange because the consumption of alcohol is "high" and "very-high" for women as they occupy the larger area in the chart as compared to male.
+```{r, echo=FALSE}
+ggplot(data.source, aes(x = Dalc, y = age, color = sex)) +
+geom_col()
+```
+
+```{r, echo=FALSE}
+ggplot(new_data.source, aes(x = Dalc, y = age, color = sex)) +
+geom_col()
+```
+
+We compared Weekend alcohol consumption with age and sex from the original dataset to the new dataset and discovered that there are significant differnces as compared to that with workday alcohol consumption. As clearly seen in orginal dataset there is also "very high" and "high" consumption of alcohol. In new data set women seems to outperform male in alcohol consumption in "high" category. 
+```{r, echo=FALSE}
+ggplot(data.source, aes(x = Walc, y = age, color = sex)) +
+geom_col()
+```
+```{r, echo=FALSE}
+ggplot(new_data.source, aes(x = Walc, y = age, color = sex)) +
+geom_col()
+```
 # Data Visualization 
 ## Scatter Plot of grade comparision
 Please see the scatter plot representations side by side on the left for the original dataset and on the right for the new survey data set. Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data scatter plot.
 
 Original Dataset:
-The two scatter plots have little meaning. First, none of the 85 students consumed excessive amounts of alcohol on a regular basis. Second, practically all of those who had pretty high scores consumed very little alcohol over the week. Third, math and Portuguese grades appear to be substantially correlated. The corrected R-squared is 0.55 when I regress Portuguese grades on math grades. This suggests that the correlation coefficient between math and Portuguese grades is around 0.74, and that change in math grades may explain approximately 55% of the variance in Portuguese grades. This, in my opinion, indicates that I may proceed with combining the two tables
+The two scatter plots from original dataset have little meaning. First, none of the 85 students consumed excessive amounts of alcohol on a regular basis. Second, practically all of those who had pretty high scores consumed very little alcohol over the week. Third, math and Portuguese grades appear to be substantially correlated. The corrected R-squared is 0.55 when I regress Portuguese grades on math grades. This suggests that the correlation coefficient between math and Portuguese grades is around 0.74, and that change in math grades may explain approximately 55% of the variance in Portuguese grades. This, in my opinion, indicates that I may proceed with combining the two tables
 
 New Survey Dataset:
+The right scatter plot with new survey data shows us as follows. According to the Dalc scatterplot, the majority of the hue is extreme red "very low," indicating that students consume relatively little alcohol throughout the workday. According to Walc We might also conclude that the predominant color is green "medium" that occurred during. We can observe that the line in the new dataset plot is straight, indicating that there is a minor positive connection between enggrades and mathgrades, as opposed to the original dataset, which displays an extraordinarily strong positive correlation. As a result, we may combine these two tables as well.
 
 
-```{r, echo=FALSE}
+```{r,  echo=FALSE}
 # Original Data
 # In this we have merged grade from period/semester 1 + period/semester 2 + period/semester 3 and calculated the mean of the grade using rowMean function, we did this separately for math grade and Portuguese grade.
 data.source$mathgrades <- rowMeans(cbind(data.source$G1.x, data.source$G2.x, data.source$G3.x))
 data.source$portgrades <- rowMeans(cbind(data.source$G1.y, data.source$G2.y, data.source$G3.y))
 
-data.source$Dalc <- as.factor(data.source$Dalc) # Added new column Dalc in original datasource 
-data.source$Dalc <- mapvalues(data.source$Dalc, # converted from numeric to factor
+data.source$Dalc <- as.factor(data.source$Dalc) # converted from numeric to factor
+data.source$Dalc <- mapvalues(data.source$Dalc, 
   from = 1:5,
   to = c("Very Low", "Low", "Medium", "High", "Very High") #Mapvalues to new variable name later will be used for ledger in plot.
 )
@@ -127,8 +160,8 @@ str1 <- ggplot(data.source, aes(x = mathgrades, y = portgrades)) +
   scale_colour_hue(l = 25, c = 150) +
   geom_smooth(method = "lm", se = FALSE)
 
-data.source$Walc <- as.factor(data.source$Walc) # Added new column Walc in original datasource 
-data.source$Walc <- mapvalues(data.source$Walc, # converted from numeric to factor
+data.source$Walc <- as.factor(data.source$Walc) # converted from numeric to factor
+data.source$Walc <- mapvalues(data.source$Walc, 
   from = 1:5,
   to = c("Very Low", "Low", "Medium", "High", "Very High") #Mapvalues to new variable name later will be used for ledger in plot.
 )
@@ -241,8 +274,12 @@ Below we have commented on our thoughts on the new survey data set and also offe
 Original Dataset:
 In the preceding regression, the adjusted R-squared is just 0.17, which is fairly low. It means that variance in everything else explains just 17% of the variation in average grades. Studytime, schoolsup, paid, and higher are the variables that have a statistically significant influence on average grade.
 
+<<<<<<< Updated upstream
 New Survey Dataset:
 
+=======
+New Survey Dataset: In the below regression, the adjusted R-squared is 0.28, which is not very high but better than the original dataset. It means that variance in everything else explains just 28% of the variation in average grades. School, Mjob, absences are the variable that have a statistically significant influence over grade.
+>>>>>>> Stashed changes
 
 ```{r, echo=FALSE}
 failureind<-which(names(d3norepeats)=="failures")
@@ -378,12 +415,13 @@ print(nmse.rf) # 0.17
 # Random Forest
 
 Below we have commented on our thoughts on the new survey data set and also offered the author's thoughts on the original data result of  Random Forest
+
 Original Dataset:
 The random forest implementation has an NMSE of 0.2, which is significantly lower than the NMSEs of the linear and regression tree models. As a validation, I will acquire the random forest error plot and compare it to the error plots produced before for the linear and regression tree models.
 
-Despite the fact that random forest appears to regularly underpredict low grade earners and overpredict high grade earners, random forest appears to be a considerably better predictor of average grades than either the linear regression or regression tree model. 10 x 5 fold cross validation on my local machine confirms that the RF model with 500 trees is the best predictor of average student grades out of the three models that I executed here (somehow Kaggle's notebook environment keeps reconnecting and is unable to run the cross-validation code in the notebook environment). With 500 points, I illustrate the relative relevance of all the characteristics in the dataset as determined by the Random Forest.
+Despite the fact that random forest appears to regularly underpredict low grade earners and overpredict high grade earners, random forest appears to be a considerably better predictor of average grades than either the linear regression or regression tree model. 10 x 5 fold cross validation on my local machine confirms that the RF model with 500 trees is the best predictor of average student grades out of the three models that I executed With 500 points, I illustrate the relative relevance of all the characteristics in the dataset as determined by the Random Forest.
 
-New Dataset:
+New Dataset:The random forest implementation has an NMSE of 0.17, which is significantly lower than the NMSEs of the linear and regression tree models. As a validation, I will acquire the random forest error plot and compare it to the error plots produced before for the linear and regression tree models.
 
 
 ```{r, echo=FALSE}
